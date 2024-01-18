@@ -25,6 +25,7 @@ namespace UdrdLib
         /// アダプタを登録するイベント
         /// </summary>
         public IObserver<CommandAdapter> AddAdapter { get; set; }
+
         public CommandFacade(IObserver<CommandAdapter> addOvserve, INotifyPropertyChanged item, StateType state)
         {
             AddAdapter=addOvserve;
