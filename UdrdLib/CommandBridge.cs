@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using LinqHelper;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UdrdLib
 {
-
-    public class CommandAdapter
+    /// <summary>
+    /// コマンドとアイテム参照の橋渡し
+    /// </summary>
+    internal class CommandBridge
     {
         /// <summary>
         /// 監視対象インスタンス
@@ -19,8 +17,10 @@ namespace UdrdLib
         /// </summary>
         public SetCommand Cmd { get; set; }
 
-        public CommandAdapter() 
+        public CommandBridge(INotifyPropertyChanged item,SetCommand command) 
         {
+            Item = item;
+            Cmd = command;
         }
         /// <summary>
         /// 保持インスタンスと保持しているコマンドのプロパティセットをを実行
@@ -30,7 +30,7 @@ namespace UdrdLib
         {
             try
             {
-                Cmd.Property.SetValue(Item, Cmd.Value);
+                Item.SetPropertyValueFromPath(Cmd.PropertyPath,Cmd.Value);
             }catch (Exception ex)
             {
                 System.Diagnostics.Debug.Write(ex.ToString());

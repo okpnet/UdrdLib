@@ -1,6 +1,8 @@
-﻿using System.ComponentModel;
+﻿using LinqHelper;
+using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reflection;
 
 namespace UdrdLib
 {
@@ -24,11 +26,10 @@ namespace UdrdLib
         /// <summary>
         /// アダプタを登録するイベント
         /// </summary>
-        public IObserver<CommandAdapter> AddAdapter { get; set; }
+        internal IObserver<CommandBridge> AddAdapter { get; init; }
 
-        public CommandFacade(IObserver<CommandAdapter> addOvserve, INotifyPropertyChanged item, StateType state)
+        public CommandFacade( INotifyPropertyChanged item, StateType state)
         {
-            AddAdapter=addOvserve;
             Item = item;
             State = state;
             Init();
@@ -40,26 +41,36 @@ namespace UdrdLib
         {
             var props=Item.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.DeclaredOnly);
 
-            foreach(var prop in props.Where(t=>t.SetMethod is not null))
-            {
-                disposables.Add(
-                    Observable.FromEventPattern(Item,nameof(Item.PropertyChanged)).Where(t=> ((PropertyChangedEventArgs)t.EventArgs).PropertyName==prop.Name).Subscribe(t =>
-                    {//コマンドを追加
-                        State = State == StateType.AddUnchange ? StateType.Add : StateType.Modify;
-
-                        if (t.Sender is INotifyPropertyChanged sendItem)
-                        {
-                            var val = prop.GetValue(Item);
-                            AddAdapter.OnNext(new CommandAdapter { Cmd = new SetCommand(prop, val), Item = sendItem });
-                        }
-                    })
-                );
-            }
+            disposables.Add(
+            Observable.FromEventPattern(Item, nameof(Item.PropertyChanged)).Subscribe(t =>
+            {//コマンドを追加
+                    State = State == StateType.AddUnchange ? StateType.Add : StateType.Modify;
+                    if (t.Sender is INotifyPropertyChanged sender && t.EventArgs is PropertyChangedEventArgs e)
+                    {
+                        AddEvent(sender, e);
+                    }
+                })
+            );
         }
         public void Dispose()
         {
             disposables.Clear();
             disposables.Dispose();
+        }
+        /// <summary>
+        /// 追加イベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
+        protected void AddEvent(INotifyPropertyChanged sender,PropertyChangedEventArgs eventArgs)
+        {
+            if(
+                eventArgs.PropertyName is string path && 
+                Item.GetType().GetPropertyFromPath(path) is PropertyInfo)
+            {
+                var value=Item.GetPropertyValueFromPath(path);
+                AddAdapter.OnNext(new CommandBridge(Item, new SetCommand(path, value)));
+            }
         }
     }
 }

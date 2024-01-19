@@ -18,8 +18,17 @@ namespace UdrdLib.Tests
             var item = new Test();
             var mng= new ExecuteHistory();
             mng.AddObserveItem(item);
-            item.Id = 10;
-
+            item.TestId = 10;
+            item.TestId = 9;
+            item.TestId = 8;
+            item.TestId = 7;
+            item.TestId = 6;
+            mng.ToPrev();
+            mng.ToPrev();
+            mng.ToPrev();
+            mng.ToNext();
+            mng.ToNext();
+            item.TestId = 99;
             Assert.Fail();
         }
     }

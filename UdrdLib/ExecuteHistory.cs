@@ -16,11 +16,16 @@ namespace UdrdLib
         /// <summary>
         /// 戻るのとき
         /// </summary>
-        readonly Stack<CommandAdapter> redoStack = new();
+        readonly Stack<CommandBridge> redoStack = new();
         /// <summary>
         /// プロパティセットコマンドをスタックする
         /// </summary>
-        public Stack<CommandAdapter> ExecuteStack { get; } = new Stack<CommandAdapter>();
+        readonly Stack<CommandBridge> executeStack  = new Stack<CommandBridge>();
+        /// <summary>
+        /// 
+        /// </summary>
+        CommandBridge? current = null;
+        bool commandPrevOrNext = false;
 
         /// <summary>
         /// 監視対象のインスタンスの追加｡newItem引数がTrueのとき､新規の変更なしとして追加する｡Falseのときは変更なしとして追加する｡
@@ -32,7 +37,10 @@ namespace UdrdLib
         {
             if (facades.Any(t => ReferenceEquals(t.Item, item))) return;
             facades.Add(
-                    new CommandFacade(Observer.Create<CommandAdapter>(t => AddStack(t)), item, newItem ? StateType.AddUnchange : StateType.ModifyUnchange)
+                    new CommandFacade(item, newItem ? StateType.AddUnchange : StateType.ModifyUnchange)
+                        {
+                            AddAdapter= Observer.Create<CommandBridge>(t => AddStack(t))
+                        }
                 );
         }
         /// <summary>
@@ -41,13 +49,26 @@ namespace UdrdLib
         /// <returns></returns>
         public bool ToPrev()
         {
-            if(ExecuteStack.TryPop(out var result))
+            
+            commandPrevOrNext= true;
+            try
             {
-                redoStack.Push(result);
-                result.ToExecute();
-                return true;
+                if(executeStack.TryPop(out var result))
+                {
+                    if(current is not null)
+                    {
+                        redoStack.Push(current);
+                    }
+                    current = result;
+                    current.ToExecute();
+                    return true;
+                }
+                return false;
             }
-            return false;
+            finally
+            {
+                commandPrevOrNext= false;
+            }
         }
         /// <summary>
         /// 戻した状態を1つ進める
@@ -55,21 +76,38 @@ namespace UdrdLib
         /// <returns></returns>
         public bool ToNext()
         {
-            if(redoStack.TryPop(out var result))
+            commandPrevOrNext = true;
+            try
             {
-                ExecuteStack.Push(result);
-                result.ToExecute();
-                return true;
+                if (redoStack.TryPop(out var result))
+                {
+                    if(current is not null)
+                    {
+                        executeStack.Push(result);
+                    }
+                    current = result;
+                    current.ToExecute();
+                    return true;
+                }
+                return false;
             }
-            return false;
+            finally
+            {
+                commandPrevOrNext = false;
+            }
         }
         /// <summary>
         /// 変更をSTACKに追加
         /// </summary>
         /// <param name="commandAdapter"></param>
-        void AddStack(CommandAdapter commandAdapter)
+        void AddStack(CommandBridge commandAdapter)
         {
-            ExecuteStack.Push(commandAdapter);
+            if (commandPrevOrNext) return;
+            if(current is not null)
+            {
+                executeStack.Push(current);
+            }
+            current = commandAdapter;
             redoStack.Clear();
         }
     }

@@ -8,18 +8,17 @@ namespace UdrdLib
     public class SetCommand
     {
         /// <summary>
-        /// セットしたプロパティ
+        /// セットしたプロパティのパス
         /// </summary>
-        public PropertyInfo Property { get;  }
+        public string PropertyPath { get;  }
         /// <summary>
         /// セットされた値
         /// </summary>
         public object? Value { get; }
 
-        public SetCommand(PropertyInfo propertyInfo, object? value)
+        public SetCommand(string propertyPath, object? value)
         {
-            if (propertyInfo.SetMethod is null) throw new NullReferenceException($"{propertyInfo.Name} not exists setter");
-            Property = propertyInfo;
+            PropertyPath = propertyPath;
             Value = value;
         }
     }

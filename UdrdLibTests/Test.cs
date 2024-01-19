@@ -11,7 +11,7 @@ namespace UdrdLibTests
     public class Test : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        public int Id { get; set; }
+        public int TestId { get; set; }
         public string Name { get; set; }
 
         public DateTime ToDay { get; }= DateTime.Now;
