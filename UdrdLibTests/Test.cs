@@ -15,5 +15,7 @@ namespace UdrdLibTests
         public string Name { get; set; }
 
         public DateTime ToDay { get; }= DateTime.Now;
+
+        public ICollection<Test> Children { get; set; }=new List<Test>();
     }
 }

@@ -39,15 +39,13 @@ namespace UdrdLib
         /// </summary>
         protected void Init()
         {
-            var props=Item.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.DeclaredOnly);
-
             disposables.Add(
             Observable.FromEventPattern(Item, nameof(Item.PropertyChanged)).Subscribe(t =>
             {//コマンドを追加
                     State = State == StateType.AddUnchange ? StateType.Add : StateType.Modify;
                     if (t.Sender is INotifyPropertyChanged sender && t.EventArgs is PropertyChangedEventArgs e)
                     {
-                        AddEvent(sender, e);
+                        PropertyChanged(sender, e);
                     }
                 })
             );
@@ -62,7 +60,7 @@ namespace UdrdLib
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="eventArgs"></param>
-        protected void AddEvent(INotifyPropertyChanged sender,PropertyChangedEventArgs eventArgs)
+        protected void PropertyChanged(INotifyPropertyChanged sender,PropertyChangedEventArgs eventArgs)
         {
             if(
                 eventArgs.PropertyName is string path && 

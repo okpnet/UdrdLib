@@ -18,6 +18,9 @@ namespace UdrdLib.Tests
             var item = new Test();
             var mng= new ExecuteHistory();
             mng.AddObserveItem(item);
+            var arrayItem = new Test() { Name = "array" };
+            item.Children.Add(arrayItem);
+            arrayItem.Name = "change";
             item.TestId = 10;
             item.TestId = 9;
             item.TestId = 8;
