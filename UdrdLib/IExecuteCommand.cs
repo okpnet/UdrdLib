@@ -25,6 +25,13 @@ namespace UdrdLib
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        bool ToExcecute<T>(T item) where T : class, INotifyPropertyChanged;
+        bool ToPrev<T>(T item) where T : class, INotifyPropertyChanged;
+        /// <summary>
+        /// コマンドを実行
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        bool ToNext<T>(T item) where T : class, INotifyPropertyChanged;
     }
 }

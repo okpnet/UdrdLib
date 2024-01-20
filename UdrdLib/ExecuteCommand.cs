@@ -1,6 +1,5 @@
 ﻿using LinqHelper;
 using System.ComponentModel;
-using System.Reflection;
 
 namespace UdrdLib
 {
@@ -34,7 +33,21 @@ namespace UdrdLib
         /// <typeparam name="T"></typeparam>
         /// <param name="item"></param>
         /// <returns></returns>
-        public virtual bool ToExcecute<T>(T item) where T : class,INotifyPropertyChanged
+        public virtual bool ToPrev<T>(T item) where T : class, INotifyPropertyChanged=>ToExcecute(item);
+        /// <summary>
+        /// コマンドを実行
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public virtual bool ToNext<T>(T item) where T : class, INotifyPropertyChanged => ToExcecute(item);
+        /// <summary>
+        /// コマンドを実行
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        protected virtual bool ToExcecute<T>(T item) where T : class,INotifyPropertyChanged
         {
             try
             {

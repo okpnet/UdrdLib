@@ -37,11 +37,11 @@ namespace UdrdLib
         {
             if (facades.Any(t => ReferenceEquals(t.Item, item))) return;
             facades.Add(
-                    new CommandFacade(item, newItem ? StateType.AddUnchange : StateType.ModifyUnchange)
-                        {
-                            AddAdapter= Observer.Create<CommandBridge>(t => AddStack(t)),
-                            AddFacade=Observer.Create<(INotifyPropertyChanged,bool)>(t=>AddObserveItem(t.Item1,t.Item2)),
-                        }
+                    new CommandFacade(
+                        item,
+                        newItem ? StateType.AddUnchange : StateType.ModifyUnchange,
+                        Observer.Create<CommandBridge>(t => AddStack(t)),
+                        Observer.Create<(INotifyPropertyChanged,bool)>(t=>AddObserveItem(t.Item1,t.Item2)))
                 );
         }
         /// <summary>
@@ -61,7 +61,7 @@ namespace UdrdLib
                         redoStack.Push(current);
                     }
                     current = result;
-                    current.ToExecute();
+                    current.ToPrev();
                     return true;
                 }
                 return false;
@@ -87,9 +87,15 @@ namespace UdrdLib
                         executeStack.Push(result);
                     }
                     current = result;
-                    current.ToExecute();
+                    current.ToNext();
                     return true;
                 }
+                //else if (current is not null)
+                //{
+                //    current.ToExecute();
+                //    current = null;
+                //    return true;
+                //}
                 return false;
             }
             finally

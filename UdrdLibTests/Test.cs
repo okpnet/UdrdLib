@@ -18,5 +18,9 @@ namespace UdrdLibTests
         public DateTime ToDay { get; }= DateTime.Now;
 
         public ICollection<Test> Children { get; set; }=new ObservableCollection<Test>();
+        public override string ToString()
+        {
+            return $"Id={TestId} Name={Name} ToDay={ToDay} ChildrenCnt={Children.Count} Children...\n    {string.Join("\n    ",Children.Select(t=>t.ToString()))}";
+        }
     }
 }

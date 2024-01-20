@@ -1,12 +1,11 @@
-﻿using LinqHelper;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace UdrdLib
 {
     /// <summary>
     /// コマンドとアイテム参照の橋渡し
     /// </summary>
-    internal class CommandBridge
+    public class CommandBridge
     {
         /// <summary>
         /// 監視対象インスタンス
@@ -17,15 +16,20 @@ namespace UdrdLib
         /// </summary>
         public IExecuteCommand Command { get; set; }
 
-        public CommandBridge(INotifyPropertyChanged item,ExecuteCommand command) 
+        public CommandBridge(INotifyPropertyChanged item,IExecuteCommand command) 
         {
             Item = item;
             Command = command;
         }
         /// <summary>
-        /// 保持インスタンスと保持しているコマンドのプロパティセットをを実行
+        /// 
         /// </summary>
         /// <returns></returns>
-        public bool ToExecute() => Command.ToExcecute(Item);
+        public bool ToNext() => Command.ToNext(Item);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public bool ToPrev()=> Command.ToPrev(Item);
     }
 }
