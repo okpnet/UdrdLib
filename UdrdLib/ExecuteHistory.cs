@@ -39,7 +39,8 @@ namespace UdrdLib
             facades.Add(
                     new CommandFacade(item, newItem ? StateType.AddUnchange : StateType.ModifyUnchange)
                         {
-                            AddAdapter= Observer.Create<CommandBridge>(t => AddStack(t))
+                            AddAdapter= Observer.Create<CommandBridge>(t => AddStack(t)),
+                            AddFacade=Observer.Create<(INotifyPropertyChanged,bool)>(t=>AddObserveItem(t.Item1,t.Item2)),
                         }
                 );
         }
