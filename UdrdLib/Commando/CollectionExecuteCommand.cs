@@ -1,23 +1,32 @@
 ﻿using LinqHelper;
 using System.Collections;
 using System.ComponentModel;
-using System.Reflection;
 
-namespace UdrdLib
+namespace UdrdLib.Commando
 {
     /// <summary>
     /// コレクションのコマンド
     /// </summary>
-    public class CollectionExecuteCommand:ExecuteCommand, IExecuteCommand
+    public class CollectionExecuteCommand : ExecuteCommand, ICollectionExecuteCommand,IExecuteCommand
     {
-        public CollectionExecuteCommand(string propertyPath, object? value, OperateType operaiton) : base(propertyPath, value, operaiton)
+        /// <summary>
+        /// どんな操作がされたか
+        /// </summary>
+        public OperateType Operation { get; }
+        /// <summary>
+        /// セットされるまえの値
+        /// </summary>
+        public object? Value { get; }
+        public CollectionExecuteCommand(string propertyPath, object? value, OperateType operaiton) : base(propertyPath)
         {
+            Operation = operaiton;
+            Value = value;
         }
 
-        public override bool ToPrev<T>(T item)=>ToExcecute(item,false);
+        public override bool ToPrev<T>(T item) => ToExcecute(item, false);
         public override bool ToNext<T>(T item) => ToExcecute(item, true);
 
-        protected bool ToExcecute<T>(T item,bool foword) where T : class, INotifyPropertyChanged
+        protected bool ToExcecute<T>(T item, bool foword) where T : class, INotifyPropertyChanged
         {
             try
             {
@@ -25,11 +34,11 @@ namespace UdrdLib
                 {
                     return false;
                 }
-                
+
                 var remove = collection.GetType().GetMethod(nameof(ICollection<object>.Remove));
                 var add = collection.GetType().GetMethod(nameof(ICollection<object>.Add));
 
-                if(remove is null || add is null)
+                if (remove is null || add is null)
                 {
                     return false;
                 }

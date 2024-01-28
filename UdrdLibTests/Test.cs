@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using UdrdLib;
 
 namespace UdrdLibTests
 {
@@ -21,6 +22,15 @@ namespace UdrdLibTests
         public override string ToString()
         {
             return $"Id={TestId} Name={Name} ToDay={ToDay} ChildrenCnt={Children.Count} Children...\n    {string.Join("\n    ",Children.Select(t=>t.ToString()))}";
+        }
+        public void OnPropertyChanged(string propertyName, object before, object after)
+        {
+            //Perform property validation
+            var propertyChanged = PropertyChanged;
+            if (propertyChanged != null)
+            {
+                propertyChanged(this, new PropertyChangedEventHasArgs(propertyName,before,after));
+            }
         }
     }
 }

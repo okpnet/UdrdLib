@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reflection;
+using UdrdLib.Commando;
 
 namespace UdrdLib
 {
@@ -52,30 +53,6 @@ namespace UdrdLib
             var arrayProperties = properties
                 .Where(t=>t.PropertyType.IsGenericType && t.PropertyType.GetGenericTypeDefinition() == typeof(ICollection<>));
 
-            var initCommandList = new List<IExecuteCommand>();
-
-            foreach (var prop in properties)
-            {//インスタンスの最初の状態を生成
-                var value = Item.GetPropertyValueFromPath(prop.Name);
-
-                if (
-                    value is null &&
-                    (
-                        !(prop.PropertyType.IsGenericType && prop.PropertyType == typeof(Nullable<>)) ||
-                        !prop.PropertyType.IsClass ||
-                        !prop.PropertyType.IsInterface 
-                    )
-                )
-                {
-                    continue;
-                }
-                initCommandList.Add(new ExecuteCommand(prop.Name,value,OperateType.Set));
-            }
-
-            if (initCommandList.Any())
-            {//最初の状態をスタックに追加
-                addCommandBridgeObserver.OnNext(new CommandBridge(Item, new InitExecuteCommand("",initCommandList, OperateType.Set)));
-            }
 
             foreach(var property in arrayProperties ) 
             {
@@ -97,13 +74,12 @@ namespace UdrdLib
             disposables.Add(
                 Observable.FromEventPattern(Item, nameof(Item.PropertyChanged)).Subscribe(t =>
                 {//変更後のコマンドを追加
-                    if (t.Sender is INotifyPropertyChanged sender && t.EventArgs is PropertyChangedEventArgs e)
+                    if (t.Sender is INotifyPropertyChanged sender && t.EventArgs is PropertyChangedEventHasArgs e)
                     {
                         PropertyChanged(sender, e);
                     }
                 })
             );
-
         }
         public void Dispose()
         {
@@ -115,15 +91,14 @@ namespace UdrdLib
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="eventArgs"></param>
-        protected void PropertyChanged(INotifyPropertyChanged sender,PropertyChangedEventArgs eventArgs)
+        protected void PropertyChanged(INotifyPropertyChanged sender, PropertyChangedEventHasArgs eventArgs)
         {
             if(
                 eventArgs.PropertyName is string path && 
                 Item.GetType().GetPropertyFromPath(path) is PropertyInfo)
             {
                 State = State == StateType.AddUnchange ? StateType.Add : StateType.Modify;
-                var value=Item.GetPropertyValueFromPath(path);
-                addCommandBridgeObserver.OnNext(new CommandBridge(Item, new ExecuteCommand(path, value,OperateType.Set)));
+                addCommandBridgeObserver.OnNext(new CommandBridge(Item, new PropertyChangeCommand(path, eventArgs.BeforeValue,eventArgs.AfterValue)));
             }
         }
         /// <summary>

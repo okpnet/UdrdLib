@@ -21,10 +21,7 @@ namespace UdrdLib
         /// プロパティセットコマンドをスタックする
         /// </summary>
         readonly Stack<CommandBridge> executeStack  = new Stack<CommandBridge>();
-        /// <summary>
-        /// 
-        /// </summary>
-        CommandBridge? current = null;
+
         bool commandPrevOrNext = false;
 
         /// <summary>
@@ -56,12 +53,8 @@ namespace UdrdLib
             {
                 if(executeStack.TryPop(out var result))
                 {
-                    if(current is not null)
-                    {
-                        redoStack.Push(current);
-                    }
-                    current = result;
-                    current.ToPrev();
+                    redoStack.Push(result);
+                    result.ToPrev();
                     return true;
                 }
                 return false;
@@ -82,20 +75,10 @@ namespace UdrdLib
             {
                 if (redoStack.TryPop(out var result))
                 {
-                    if(current is not null)
-                    {
-                        executeStack.Push(result);
-                    }
-                    current = result;
-                    current.ToNext();
+                    executeStack.Push(result);
+                    result.ToNext();
                     return true;
                 }
-                //else if (current is not null)
-                //{
-                //    current.ToExecute();
-                //    current = null;
-                //    return true;
-                //}
                 return false;
             }
             finally
@@ -110,11 +93,7 @@ namespace UdrdLib
         void AddStack(CommandBridge commandAdapter)
         {
             if (commandPrevOrNext) return;
-            if(current is not null)
-            {
-                executeStack.Push(current);
-            }
-            current = commandAdapter;
+            executeStack.Push(commandAdapter);
             redoStack.Clear();
         }
     }

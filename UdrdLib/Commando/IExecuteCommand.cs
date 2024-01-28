@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace UdrdLib
+namespace UdrdLib.Commando
 {
     /// <summary>
     /// 実行されたコマンドのインターフェイス
@@ -11,14 +11,7 @@ namespace UdrdLib
         /// セットしたプロパティのパス
         /// </summary>
         string PropertyPath { get; }
-        /// <summary>
-        /// セットされた値
-        /// </summary>
-        object? Value { get; }
-        /// <summary>
-        /// どんな操作がされたか
-        /// </summary>
-        OperateType Operation { get; }
+
         /// <summary>
         /// コマンドを実行
         /// </summary>
